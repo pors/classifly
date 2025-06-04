@@ -1,3 +1,6 @@
+# MIT License
+# Copyright (c) 2025 Mark Pors
+
 import pygame
 
 # optional BLE controller

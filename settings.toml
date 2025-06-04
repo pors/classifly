@@ -7,7 +7,7 @@ unknown = 'skip'
 b = 'NO LAMP'
 
 [controller]
-gamesir_t1d = 'Gamesir-T1d-39BD'
+#gamesir_t1d = 'Gamesir-T1d-39BD'
 
 # Logical actions → button names (for GameSir mode)
 left   = "l1"   # shoulder L1

@@ -1,6 +1,10 @@
+// MIT License
+// Copyright (c) 2025 Mark Pors
+
 import QtQuick 6.5
 import QtQuick.Window 6.5
 import QtQuick.Effects
+import QtMultimedia
 
 Window {
     id: root
@@ -9,6 +13,13 @@ Window {
     visible: true
     title: "Image Classifier"
     visibility: Window.Maximized
+
+    // Sound effect for successful classification
+    SoundEffect {
+        id: classifySound
+        source: "yay.wav"
+        volume: 0.7
+    }
 
     Rectangle {
         id: content
@@ -79,6 +90,7 @@ Window {
 
             if (commitAllowed && pendingLabel !== "") {
                 imageQueue.classify(pendingLabel);
+                classifySound.play();
             }
 
             pendingLabel  = "";
