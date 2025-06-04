@@ -98,9 +98,9 @@ Window {
             property color neonColor: "#00ffff"
             property color glowColor: "#00ffff"
 
-            width: 180; height: 60; radius: 12
+            width: 280; height: 120; radius: 16  // Much bigger!
             color: "#1a1a2e"
-            border.width: 2
+            border.width: 3
             border.color: glowing ? glowColor : Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.3)
 
             // Animated glow intensity
@@ -108,17 +108,17 @@ Window {
                 ColorAnimation { duration: 200 }
             }
 
-            // Outer glow effect
+            // Outer glow effect - more pronounced
             Rectangle {
                 anchors.centerIn: parent
-                width: parent.width + 20
-                height: parent.height + 20
-                radius: parent.radius + 5
+                width: parent.width + 30
+                height: parent.height + 30
+                radius: parent.radius + 8
                 color: "transparent"
-                border.width: glowing ? 3 : 1
-                border.color: glowing ? Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.5) 
-                                     : Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.1)
-                opacity: glowing ? 0.8 : 0.3
+                border.width: glowing ? 6 : 2
+                border.color: glowing ? Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.7) 
+                                     : Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.15)
+                opacity: glowing ? 1.0 : 0.4
                 z: -1
 
                 Behavior on opacity {
@@ -129,29 +129,53 @@ Window {
                 }
             }
 
+            // Inner glow layer
+            Rectangle {
+                anchors.centerIn: parent
+                width: parent.width - 10
+                height: parent.height - 10
+                radius: parent.radius - 4
+                color: "transparent"
+                opacity: glowing ? 0.6 : 0
+                z: -1
+                
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "transparent" }
+                    GradientStop { position: 0.5; color: glowing ? Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.3) : "transparent" }
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+                
+                Behavior on opacity {
+                    NumberAnimation { duration: 200 }
+                }
+            }
+
             // Inner gradient
             gradient: Gradient {
                 GradientStop { 
                     position: 0.0; 
-                    color: glowing ? Qt.rgba(neonColor.r, neonColor.g, neonColor.b, 0.2) 
+                    color: glowing ? Qt.rgba(neonColor.r, neonColor.g, neonColor.b, 0.3) 
                                   : "#1a1a2e" 
                 }
                 GradientStop { 
                     position: 1.0; 
-                    color: glowing ? Qt.rgba(neonColor.r, neonColor.g, neonColor.b, 0.1) 
+                    color: glowing ? Qt.rgba(neonColor.r, neonColor.g, neonColor.b, 0.15) 
                                   : "#16162a" 
                 }
             }
 
             Column {
                 anchors.centerIn: parent
-                spacing: 2
+                spacing: 8
                 Text { 
                     id: labelName
                     color: parent.parent.glowing ? parent.parent.neonColor : "#ffffff"
                     font.bold: true
-                    font.pixelSize: 16
-                    font.family: "Consolas, Monaco, monospace"
+                    font.pixelSize: 28  // Bigger text
+                    font.family: Qt.platform.os === "osx" ? "Menlo" :
+                                Qt.platform.os === "windows" ? "Consolas" :
+                                "DejaVu Sans Mono"
+                    anchors.horizontalCenter: parent.horizontalCenter
                     Behavior on color {
                         ColorAnimation { duration: 200 }
                     }
@@ -159,20 +183,23 @@ Window {
                 Text { 
                     id: labelCount
                     color: parent.parent.glowing ? parent.parent.neonColor : "#888888"
-                    font.pixelSize: 14
-                    font.family: "Consolas, Monaco, monospace"
+                    font.pixelSize: 20  // Bigger count
+                    font.family: Qt.platform.os === "osx" ? "Menlo" :
+                                Qt.platform.os === "windows" ? "Consolas" :
+                                "DejaVu Sans Mono"
+                    anchors.horizontalCenter: parent.horizontalCenter
                     Behavior on color {
                         ColorAnimation { duration: 200 }
                     }
                 }
             }
 
-            // Subtle pulse animation when glowing
+            // More pronounced pulse animation when glowing
             SequentialAnimation on scale {
                 running: glowing
                 loops: Animation.Infinite
-                NumberAnimation { to: 1.05; duration: 500; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: 1.0; duration: 500; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: 1.08; duration: 400; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: 1.0; duration: 400; easing.type: Easing.InOutQuad }
             }
         }
 
@@ -182,8 +209,8 @@ Window {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 20
-            height: 60
+            anchors.topMargin: 40
+            height: 120
             color: "transparent"
             z: 1
 
@@ -196,7 +223,7 @@ Window {
                 glowColor: "#00ffff"
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
-                anchors.leftMargin: 20
+                anchors.leftMargin: 40
             }
 
             // Middle label - Magenta theme
@@ -219,7 +246,7 @@ Window {
                 glowColor: "#0080ff"
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                anchors.rightMargin: 20
+                anchors.rightMargin: 40
             }
         }
 
@@ -228,6 +255,7 @@ Window {
             id: imageFrame
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: 40  // Push down a bit
             width: pic.width + 20
             height: pic.height + 20
             color: "transparent"
@@ -255,8 +283,9 @@ Window {
             source: imageQueue.currentImage
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width  * 0.75
-            height: parent.height * 0.75
+            anchors.verticalCenterOffset: 40
+            width: parent.width  * 0.5   // Reduced from 0.75
+            height: parent.height * 0.5  // Reduced from 0.75
             fillMode: Image.PreserveAspectFit
             visible: source !== ""
             MouseArea { anchors.fill: parent; onClicked: imageQueue.next() }
@@ -280,7 +309,9 @@ Window {
                 text: "Controller: " + joyStatus.state + "  |  " + imageQueue.stats
                 anchors.centerIn: parent
                 color: "#00ffcc"
-                font.family: "Consolas, Monaco, monospace"
+                font.family: Qt.platform.os === "osx" ? "Menlo" :
+                             Qt.platform.os === "windows" ? "Consolas" :
+                             "DejaVu Sans Mono"
                 font.pixelSize: 12
             }
 

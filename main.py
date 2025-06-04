@@ -47,10 +47,11 @@ class ImageQueue(QObject):
         for key, label in self._labels.items():
             folder = self._base_dir / label
             self._counts[key] = (
-                len([p for p in folder.iterdir() if p.is_file()])
+                len([p for p in folder.iterdir() 
+                    if p.is_file() and not p.name.startswith('.') and p.suffix.lower() in IMG_EXT])
                 if folder.exists()
                 else 0
-            )
+    )
 
         # timing & totals
         self._start_time = time.perf_counter()
@@ -280,6 +281,14 @@ class JoystickBridge(QObject):
                     self._send(Qt.Key_Up, pressed)
                 elif evt.button == self._map.get("undo", -1):
                     self._send(Qt.Key_Down, pressed)
+
+
+def image_iter(base):
+    root = pathlib.Path(base or ".")
+    # Use glob instead of rglob to avoid subdirectories
+    for p in root.glob("*"):
+        if p.is_file() and p.suffix.lower() in IMG_EXT:
+            yield str(p)
 
 
 def main():
