@@ -8,6 +8,8 @@ Classifly is a fast, gamified image labeling tool designed for binary classifica
 ![PySide6](https://img.shields.io/badge/PySide6-6.9.0-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+<img width="1038" alt="image" src="https://github.com/user-attachments/assets/d78a62aa-ec4d-487a-9721-1a1dc09974f3" />
+
 ## Features
 
 - **Game Controller Support**: Use Xbox, PlayStation, or GameSir controllers for rapid classification
