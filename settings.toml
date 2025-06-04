@@ -1,0 +1,12 @@
+[paths]
+base_dir = '/Users/mark/dev/classifier-game/images'
+
+[labels]
+a = 'LAMP'
+unknown = 'skip'
+b = 'NO LAMP'
+
+[controller]
+left = 4  # LB
+right = 5  # RB
+middle = 0  # A
