@@ -1,5 +1,5 @@
 [paths]
-base_dir = '/Users/mark/dev/classifier-game/images'
+base_dir = '/Users/mark/dev/classifly/images'
 
 [labels]
 a = 'LAMP'

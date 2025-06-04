@@ -167,7 +167,7 @@ Window {
         /* ─── status line ───────────────────────────────────────────── */
         Text {
             id: statusBar
-            text: "Controller: disconnected"
+            text: "Controller: " + joyStatus.state
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom; anchors.bottomMargin: 10
             color: "#dddddd"
