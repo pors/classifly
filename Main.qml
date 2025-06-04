@@ -1,5 +1,6 @@
 import QtQuick 6.5
 import QtQuick.Window 6.5
+import QtQuick.Effects
 
 Window {
     id: root
@@ -12,60 +13,61 @@ Window {
     Rectangle {
         id: content
         anchors.fill: parent
-        color: "#202020"
         focus: true
         Keys.priority: Keys.BeforeItem 
-        Component.onCompleted: forceActiveFocus()   // ensure focus at startup
+        Component.onCompleted: forceActiveFocus()
+
+        // Cyberpunk gradient background
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#0a0a0f" }
+            GradientStop { position: 0.5; color: "#1a1a2e" }
+            GradientStop { position: 1.0; color: "#0f0f1e" }
+        }
 
         property string pendingLabel: ""
-        property bool commitAllowed: false          // true while 1-s timer running
+        property bool commitAllowed: false
 
         Timer {
             id: holdTimer
-            interval: 1000        // 1 second
+            interval: 1000
             repeat: false
             onTriggered: {
-                // Held too long → cancel
                 content.commitAllowed = false;
                 content.pendingLabel  = "";
-                leftLabel.border.width =
-                middleLabel.border.width =
-                rightLabel.border.width = 0;
+                leftLabel.glowing = false;
+                middleLabel.glowing = false;
+                rightLabel.glowing = false;
             }
         }
 
         Keys.onPressed: (event) => {
             if (event.isAutoRepeat) return;
 
-            // --- UNDO with Down arrow ---
             if (event.key === Qt.Key_Down) {
                 imageQueue.undo();
                 return;
             }
 
-            commitAllowed = true;      // assume we’ll commit unless timer expires
-            holdTimer.restart();       // (re)start 1-second countdown
+            commitAllowed = true;
+            holdTimer.restart();
 
-            // clear previous highlight
-            leftLabel.border.width =
-            middleLabel.border.width =
-            rightLabel.border.width = 0;
+            // Reset all glows
+            leftLabel.glowing = false;
+            middleLabel.glowing = false;
+            rightLabel.glowing = false;
 
             switch (event.key) {
             case Qt.Key_Left:
                 pendingLabel = "a";
-                leftLabel.border.color = "red";
-                leftLabel.border.width = 4;
+                leftLabel.glowing = true;
                 break;
             case Qt.Key_Up:
                 pendingLabel = "unknown";
-                middleLabel.border.color = "red";
-                middleLabel.border.width = 4;
+                middleLabel.glowing = true;
                 break;
             case Qt.Key_Right:
                 pendingLabel = "b";
-                rightLabel.border.color = "red";
-                rightLabel.border.width = 4;
+                rightLabel.glowing = true;
                 break;
             }
         }
@@ -73,22 +75,105 @@ Window {
         Keys.onReleased: (event) => {
             if (event.isAutoRepeat) return;
 
-            holdTimer.stop();      // stop the countdown
+            holdTimer.stop();
 
             if (commitAllowed && pendingLabel !== "") {
-                // Released within 1 s → commit (move) for *all* labels
-                imageQueue.classify(pendingLabel);   // 'unknown' included
+                imageQueue.classify(pendingLabel);
             }
 
-            // Clear state and highlight
             pendingLabel  = "";
-            leftLabel.border.width =
-            middleLabel.border.width =
-            rightLabel.border.width = 0;
+            leftLabel.glowing = false;
+            middleLabel.glowing = false;
+            rightLabel.glowing = false;
 
-            // Optional quit keys
             if (event.key === Qt.Key_Escape || event.key === Qt.Key_Q)
                 Qt.quit();
+        }
+
+        /* ─── Neon Label Component ─────────────────────────────────── */
+        component NeonLabel: Rectangle {
+            property alias labelText: labelName.text
+            property alias countText: labelCount.text
+            property bool glowing: false
+            property color neonColor: "#00ffff"
+            property color glowColor: "#00ffff"
+
+            width: 180; height: 60; radius: 12
+            color: "#1a1a2e"
+            border.width: 2
+            border.color: glowing ? glowColor : Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.3)
+
+            // Animated glow intensity
+            Behavior on border.color {
+                ColorAnimation { duration: 200 }
+            }
+
+            // Outer glow effect
+            Rectangle {
+                anchors.centerIn: parent
+                width: parent.width + 20
+                height: parent.height + 20
+                radius: parent.radius + 5
+                color: "transparent"
+                border.width: glowing ? 3 : 1
+                border.color: glowing ? Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.5) 
+                                     : Qt.rgba(glowColor.r, glowColor.g, glowColor.b, 0.1)
+                opacity: glowing ? 0.8 : 0.3
+                z: -1
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 200 }
+                }
+                Behavior on border.width {
+                    NumberAnimation { duration: 200 }
+                }
+            }
+
+            // Inner gradient
+            gradient: Gradient {
+                GradientStop { 
+                    position: 0.0; 
+                    color: glowing ? Qt.rgba(neonColor.r, neonColor.g, neonColor.b, 0.2) 
+                                  : "#1a1a2e" 
+                }
+                GradientStop { 
+                    position: 1.0; 
+                    color: glowing ? Qt.rgba(neonColor.r, neonColor.g, neonColor.b, 0.1) 
+                                  : "#16162a" 
+                }
+            }
+
+            Column {
+                anchors.centerIn: parent
+                spacing: 2
+                Text { 
+                    id: labelName
+                    color: parent.parent.glowing ? parent.parent.neonColor : "#ffffff"
+                    font.bold: true
+                    font.pixelSize: 16
+                    font.family: "Consolas, Monaco, monospace"
+                    Behavior on color {
+                        ColorAnimation { duration: 200 }
+                    }
+                }
+                Text { 
+                    id: labelCount
+                    color: parent.parent.glowing ? parent.parent.neonColor : "#888888"
+                    font.pixelSize: 14
+                    font.family: "Consolas, Monaco, monospace"
+                    Behavior on color {
+                        ColorAnimation { duration: 200 }
+                    }
+                }
+            }
+
+            // Subtle pulse animation when glowing
+            SequentialAnimation on scale {
+                running: glowing
+                loops: Animation.Infinite
+                NumberAnimation { to: 1.05; duration: 500; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: 1.0; duration: 500; easing.type: Easing.InOutQuad }
+            }
         }
 
         /* ─── header labels ─────────────────────────────────────────── */
@@ -97,61 +182,74 @@ Window {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 10
+            anchors.topMargin: 20
             height: 60
             color: "transparent"
-            z: 1                                  // always above the image
+            z: 1
 
-            // left label
-            Rectangle {
+            // Left label - Cyan theme
+            NeonLabel {
                 id: leftLabel
-                width: 180; height: 60; radius: 8; color: "#404040"
-                border.color: "transparent"
-                border.width: 0
+                labelText: settings.labels.a
+                countText: imageQueue.countA
+                neonColor: "#00ffff"
+                glowColor: "#00ffff"
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left; anchors.leftMargin: 10
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 2
-                    Text { text: settings.labels.a; color: "white"; font.bold: true }
-                    Text { text: imageQueue.countA; color: "lightgray"; font.pixelSize: 12 }
-                }
+                anchors.left: parent.left
+                anchors.leftMargin: 20
             }
 
-            // middle label (delete / unknown)
-            Rectangle {
+            // Middle label - Magenta theme
+            NeonLabel {
                 id: middleLabel
-                width: 180; height: 60; radius: 8; color: "#404040"
-                border.color: "transparent"
-                border.width: 0
+                labelText: settings.labels.unknown
+                countText: imageQueue.countUnknown
+                neonColor: "#ff00ff"
+                glowColor: "#ff00ff"
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 2
-                    Text { text: settings.labels.unknown; color: "white"; font.bold: true }
-                    Text { text: imageQueue.countUnknown; color: "lightgray"; font.pixelSize: 12 }
-                }
             }
 
-            // right label
-            Rectangle {
+            // Right label - Electric blue theme
+            NeonLabel {
                 id: rightLabel
-                width: 180; height: 60; radius: 8; color: "#404040"
-                border.color: "transparent"
-                border.width: 0                
+                labelText: settings.labels.b
+                countText: imageQueue.countB
+                neonColor: "#0080ff"
+                glowColor: "#0080ff"
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.right: parent.right; anchors.rightMargin: 10
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 2
-                    Text { text: settings.labels.b; color: "white"; font.bold: true }
-                    Text { text: imageQueue.countB; color: "lightgray"; font.pixelSize: 12 }
-                }
+                anchors.right: parent.right
+                anchors.rightMargin: 20
             }
         }
 
-        /* ─── main picture ──────────────────────────────────────────── */
+        /* ─── main picture with neon frame ──────────────────────────── */
+        Rectangle {
+            id: imageFrame
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            width: pic.width + 20
+            height: pic.height + 20
+            color: "transparent"
+            border.width: 2
+            border.color: "#333366"
+            radius: 8
+            visible: pic.visible
+
+            // Subtle glow around image
+            Rectangle {
+                anchors.centerIn: parent
+                width: parent.width + 10
+                height: parent.height + 10
+                color: "transparent"
+                border.width: 1
+                border.color: "#222244"
+                radius: 12
+                opacity: 0.5
+                z: -1
+            }
+        }
+
         Image {
             id: pic
             source: imageQueue.currentImage
@@ -164,14 +262,34 @@ Window {
             MouseArea { anchors.fill: parent; onClicked: imageQueue.next() }
         }
 
-        /* ─── status line ───────────────────────────────────────────── */
-        Text {
-            id: statusBar
-            text: "Controller: " + joyStatus.state + "  |  " + imageQueue.stats
+        /* ─── status line with neon styling ─────────────────────────── */
+        Rectangle {
+            id: statusContainer
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom; anchors.bottomMargin: 10
-            color: "#dddddd"
-            z: 1
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 20
+            width: statusBar.width + 40
+            height: 30
+            color: "#1a1a2e"
+            border.width: 1
+            border.color: "#444466"
+            radius: 15
+
+            Text {
+                id: statusBar
+                text: "Controller: " + joyStatus.state + "  |  " + imageQueue.stats
+                anchors.centerIn: parent
+                color: "#00ffcc"
+                font.family: "Consolas, Monaco, monospace"
+                font.pixelSize: 12
+            }
+
+            // Animated gradient for status bar
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#1a1a2e" }
+                GradientStop { position: 0.5; color: "#222244" }
+                GradientStop { position: 1.0; color: "#1a1a2e" }
+            }
         }
     }
 }
