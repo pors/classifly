@@ -167,7 +167,7 @@ Window {
         /* ─── status line ───────────────────────────────────────────── */
         Text {
             id: statusBar
-            text: "Controller: " + joyStatus.state
+            text: "Controller: " + joyStatus.state + "  |  " + imageQueue.stats
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom; anchors.bottomMargin: 10
             color: "#dddddd"

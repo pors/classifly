@@ -7,6 +7,15 @@ unknown = 'skip'
 b = 'NO LAMP'
 
 [controller]
-left = 4  # LB
-right = 5  # RB
-middle = 0  # A
+gamesir_t1d = 'Gamesir-T1d-39BD'
+
+# Logical actions → button names (for GameSir mode)
+left   = "l1"   # shoulder L1
+right  = "r1"   # shoulder R1
+middle = "y"    # face Y  → skip
+undo   = "a"    # face A  → undo
+
+#left = 4  # LB
+#right = 5  # RB
+#middle = 0  # A
+#undo = 1   # B
