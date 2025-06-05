@@ -1,6 +1,6 @@
 # classifly
 
-Speed up image classification labelling with a game controller! 🎮
+Speed up image classification labeling with a game controller! 🎮
 
 Classifly is a fast, gamified image labeling tool designed for binary classification tasks. Navigate through your image dataset using a game controller or keyboard, making the tedious task of labeling images feel more like playing a game.
 
