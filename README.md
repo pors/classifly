@@ -152,6 +152,10 @@ If you have WebP images, use the included converter script:
 python convert_webp.py /path/to/images --recursive --remove
 ```
 
+## Thanks
+
+Thanks to Vincent Warmerdam who created [mopad](https://github.com/koaning/mopad) for inspiration!
+
 ## License
 
 MIT License - feel free to modify and use for your own classification tasks!
