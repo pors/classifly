@@ -154,7 +154,7 @@ python convert_webp.py /path/to/images --recursive --remove
 
 ## Thanks
 
-Thanks to Vincent Warmerdam who created [mopad](https://github.com/koaning/mopad) for inspiration!
+Shoutout to Vincent Warmerdam; [mopad](https://github.com/koaning/mopad) gave me the idea to build this.
 
 ## License
 
